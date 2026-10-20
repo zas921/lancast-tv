@@ -1,0 +1,44 @@
+name: Bug / 投屏兼容性反馈
+description: Report playback, discovery, or connection problems.
+body:
+  - type: input
+    id: version
+    attributes:
+      label: 轻投屏版本
+      placeholder: 0.1.1
+    validations:
+      required: true
+  - type: input
+    id: television
+    attributes:
+      label: 电视或盒子品牌、型号、Android 版本
+    validations:
+      required: true
+  - type: input
+    id: sender
+    attributes:
+      label: 手机型号、系统版本、视频 App 名称及版本
+    validations:
+      required: true
+  - type: dropdown
+    id: connection
+    attributes:
+      label: 使用方式
+      options:
+        - 手机 App 的 TV / DLNA 投屏入口
+        - 浏览器发送本地文件
+        - 浏览器播放网络直链
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤、预期与实际结果
+      description: 请勿上传私人媒体、登录令牌、连接码或带鉴权参数的媒体 URL。
+    validations:
+      required: true
+  - type: textarea
+    id: network
+    attributes:
+      label: 网络与其他信息
+      description: 同一路由器？电视使用 Wi-Fi 还是网线？其他 DLNA 播放器是否正常？

@@ -1,0 +1,17 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.lancast.tv'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.lancast.tv'
+        minSdk 22
+        targetSdk 28
+        versionCode 2
+        versionName '0.1.1'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}

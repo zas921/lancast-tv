@@ -1,0 +1,85 @@
+name: Build and test
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v7.0.0
+        with:
+          python-version: '3.12'
+      - name: JVM protocol and regression tests
+        shell: pwsh
+        run: ./test.ps1
+      - name: Verify QR against an independent implementation
+        run: |
+          python -m pip install -r requirements-test.txt
+          python tests/verify-qr.py
+      - name: Browser smoke tests with a simulated television API
+        run: |
+          npm ci --ignore-scripts
+          npx playwright install --with-deps chromium
+          npm test
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: browser-test-screenshots
+          path: build/*controls.png
+          if-no-files-found: ignore
+          retention-days: 7
+
+  android:
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4.0.4
+      - name: Install Android build tools
+        run: sdkmanager "platforms;android-35" "build-tools;34.0.0"
+      - name: Build and verify development-signed APK
+        shell: pwsh
+        run: ./build.ps1
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: lancast-tv-${{ matrix.os }}
+          path: |
+            dist/*.apk
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
